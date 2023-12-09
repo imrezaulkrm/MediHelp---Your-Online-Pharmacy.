@@ -59,14 +59,18 @@ pipeline {
 			    withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'docker_p', usernameVariable: 'docker_u')]) {
             // some block
 		 	 sh "echo ${docker_p} | docker login --username ${docker_u} --password-stdin"
-                   	 // Push the 'web' service
-                   	 sh "docker push ${DOCKER_REPO}/web:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+                   	 // Tag the 'web' service
+			 echo "Tagging Web Image: ${webImage} -> ${DOCKER_REPO}/web:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+			 sh "docker tag ${webImage} ${DOCKER_REPO}/web:${DATE_TAG}-${BUILD_NUMBER_TAG}"
 
-                 	 // Push the 'database' service
-                	 sh "docker push ${DOCKER_REPO}/database:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+			 // Tag the 'database' service
+			 echo "Tagging Database Image: ${databaseImage} -> ${DOCKER_REPO}/database:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+			 sh "docker tag ${databaseImage} ${DOCKER_REPO}/database:${DATE_TAG}-${BUILD_NUMBER_TAG}"
 
-                  	 // Push the 'phpmyadmin' service
-                   	 sh "docker push ${DOCKER_REPO}/phpmyadmin:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+			 // Tag the 'phpmyadmin' service
+			 echo "Tagging Phpmyadmin Image: ${phpmyadminImage} -> ${DOCKER_REPO}/phpmyadmin:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+			 sh "docker tag ${phpmyadminImage} ${DOCKER_REPO}/phpmyadmin:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+
 		   	 sh "docker logout"
 	            }
                 }
