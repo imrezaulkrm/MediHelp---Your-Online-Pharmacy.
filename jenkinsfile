@@ -1,0 +1,86 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_REPO = imrezaulkrm/final-project
+        DATE_TAG = sh(script: 'date "+%Y%m%d%H%M%S"', returnStdout: true).trim()
+        BUILD_NUMBER_TAG = "${BUILD_NUMBER}"
+    }
+
+    stage('source code pull from github') {
+            steps {
+                git branch: 'main', url: 'https://github.com/imrezaulkrm/final-project.git'
+            }
+        }
+
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    // Build Docker images
+                    sh 'docker-compose build'
+                }
+            }
+        }
+
+        stage('Determine Current Image Names') {
+            steps {
+                script {
+                    // Extract the current image names from the Docker Compose file
+                    webImage = sh(script: "docker-compose config | grep 'image:' | grep 'web' | awk '{print \$2}'", returnStdout: true).trim()
+                    databaseImage = sh(script: "docker-compose config | grep 'image:' | grep 'database' | awk '{print \$2}'", returnStdout: true).trim()
+                    phpmyadminImage = sh(script: "docker-compose config | grep 'image:' | grep 'phpmyadmin' | awk '{print \$2}'", returnStdout: true).trim()
+
+                    echo "Current Web Image Name: ${webImage}"
+                    echo "Current Database Image Name: ${databaseImage}"
+                    echo "Current Phpmyadmin Image Name: ${phpmyadminImage}"
+                }
+            }
+        }
+
+        stage('Tag') {
+            steps {
+                script {
+                    // Tag the 'web' service
+                    sh "docker tag ${webImage} ${DOCKER_REPO}/web:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+
+                    // Tag the 'database' service
+                    sh "docker tag ${databaseImage} ${DOCKER_REPO}/database:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+
+                    // Tag the 'phpmyadmin' service
+                    sh "docker tag ${phpmyadminImage} ${DOCKER_REPO}/phpmyadmin:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+                }
+            }
+        }
+
+	stage('Push') {
+	            steps {
+        	        script {
+			    withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'docker_p', usernameVariable: 'docker_u')]) {
+            // some block
+		 	 sh "echo ${PASSWORD} | docker login --username ${USER_NAME} --password-stdin"
+                   	 // Push the 'web' service
+                   	 sh "docker push ${DOCKER_REPO}/web:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+
+                 	 // Push the 'database' service
+                	 sh "docker push ${DOCKER_REPO}/database:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+
+                  	 // Push the 'phpmyadmin' service
+                   	 sh "docker push ${DOCKER_REPO}/phpmyadmin:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+		   	 sh "docker logout"
+	            }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            // Docker-compose all file down
+            sh 'docker-compose down'
+	    // Clean Up Unused Images and Containers
+            sh 'docker system prune -a'
+        }
+    }
+}
+
