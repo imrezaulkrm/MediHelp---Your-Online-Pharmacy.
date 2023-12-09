@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         DOCKER_REPO = 'imrezaulkrm/final-project:'
-        DATE_TAG = sh(script: 'date "+%Y%m%d%H%M%S"', returnStdout: true).trim()
         BUILD_NUMBER_TAG = "${BUILD_NUMBER}"
     }
 
@@ -40,19 +39,19 @@ pipeline {
         }
 
         stage('Tag') {
-            steps {
-                script {
-                    // Tag the 'web' service
-                    sh "docker tag ${webImage} ${DOCKER_REPO}web${DATE_TAG}-${BUILD_NUMBER_TAG}"
+    	    steps {
+        	script {
+            	// Tag the 'web' service
+            	sh "docker tag ${webImage} ${DOCKER_REPO}/web:${DATE_TAG}-${BUILD_NUMBER_TAG}"
 
-                    // Tag the 'database' service
-                    sh "docker tag ${databaseImage} ${DOCKER_REPO}database${DATE_TAG}-${BUILD_NUMBER_TAG}"
+            	// Tag the 'database' service
+            	sh "docker tag ${databaseImage} ${DOCKER_REPO}/database:${DATE_TAG}-${BUILD_NUMBER_TAG}"
 
-                    // Tag the 'phpmyadmin' service
-                    sh "docker tag ${phpmyadminImage} ${DOCKER_REPO}phpmyadmin${DATE_TAG}-${BUILD_NUMBER_TAG}"
-                }
-            }
-        }
+            	// Tag the 'phpmyadmin' service
+           	sh "docker tag ${phpmyadminImage} ${DOCKER_REPO}/phpmyadmin:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+              } 
+    	   }
+	}
 
 	stage('Push') {
 	            steps {
