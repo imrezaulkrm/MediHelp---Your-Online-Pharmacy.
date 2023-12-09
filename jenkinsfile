@@ -28,7 +28,7 @@ pipeline {
             steps {
                 script {
                     // Extract the current image names from the Docker Compose file
-                    webImage = sh(script: "docker-compose config | grep 'image:' | grep 'web' | awk '{print \$2}'", returnStdout: true).trim()
+                    webImage = sh(script: "docker-compose config | grep 'image:' | grep 'web' | awk '{print \$3}'", returnStdout: true).trim()
                     databaseImage = sh(script: "docker-compose config | grep 'image:' | grep 'database' | awk '{print \$2}'", returnStdout: true).trim()
                     phpmyadminImage = sh(script: "docker-compose config | grep 'image:' | grep 'phpmyadmin' | awk '{print \$2}'", returnStdout: true).trim()
 
@@ -59,7 +59,7 @@ pipeline {
         	        script {
 			    withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'docker_p', usernameVariable: 'docker_u')]) {
             // some block
-		 	 sh "echo ${PASSWORD} | docker login --username ${USER_NAME} --password-stdin"
+		 	 sh "echo ${docker_p} | docker login --username ${docker_u} --password-stdin"
                    	 // Push the 'web' service
                    	 sh "docker push ${DOCKER_REPO}/web:${DATE_TAG}-${BUILD_NUMBER_TAG}"
 
