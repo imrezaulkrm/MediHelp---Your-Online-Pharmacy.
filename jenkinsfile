@@ -42,13 +42,13 @@ pipeline {
     	    steps {
         	script {
             	// Tag the 'web' service
-            	sh "docker tag ${webImage} ${DOCKER_REPO}/web:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+            	sh "docker tag ${webImage} ${DOCKER_REPO}/web:${BUILD_NUMBER_TAG}"
 
             	// Tag the 'database' service
-            	sh "docker tag ${databaseImage} ${DOCKER_REPO}/database:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+            	sh "docker tag ${databaseImage} ${DOCKER_REPO}/database:${BUILD_NUMBER_TAG}"
 
             	// Tag the 'phpmyadmin' service
-           	sh "docker tag ${phpmyadminImage} ${DOCKER_REPO}/phpmyadmin:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+           	sh "docker tag ${phpmyadminImage} ${DOCKER_REPO}/phpmyadmin:${BUILD_NUMBER_TAG}"
               } 
     	   }
 	}
