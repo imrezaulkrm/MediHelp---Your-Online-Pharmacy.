@@ -4,11 +4,11 @@ pipeline {
     environment {
         DOCKER_REPO = 'imrezaulkrm/final-project:'
         BUILD_NUMBER_TAG = "${BUILD_NUMBER}"
+        DATE_TAG = sh(script: 'date "+%Y%m%d%H%M%S"', returnStdout: true).trim()
     }
 
     stages {
-
-    stage('source code pull from github') {
+        stage('Source Code Pull from GitHub') {
             steps {
                 git branch: 'main', url: 'https://github.com/imrezaulkrm/final-project.git'
             }
@@ -39,40 +39,39 @@ pipeline {
         }
 
         stage('Tag') {
-    	    steps {
-        	script {
-            	// Tag the 'web' service
-            	sh "docker tag ${webImage} ${DOCKER_REPO}/web:${BUILD_NUMBER_TAG}"
+            steps {
+                script {
+                    // Tag the 'web' service
+                    sh "docker tag ${webImage} ${DOCKER_REPO}/web:${BUILD_NUMBER_TAG}"
 
-            	// Tag the 'database' service
-            	sh "docker tag ${databaseImage} ${DOCKER_REPO}/database:${BUILD_NUMBER_TAG}"
+                    // Tag the 'database' service
+                    sh "docker tag ${databaseImage} ${DOCKER_REPO}/database:${BUILD_NUMBER_TAG}"
 
-            	// Tag the 'phpmyadmin' service
-           	sh "docker tag ${phpmyadminImage} ${DOCKER_REPO}/phpmyadmin:${BUILD_NUMBER_TAG}"
-              } 
-    	   }
-	}
+                    // Tag the 'phpmyadmin' service
+                    sh "docker tag ${phpmyadminImage} ${DOCKER_REPO}/phpmyadmin:${BUILD_NUMBER_TAG}"
+                }
+            }
+        }
 
-	stage('Push') {
-	            steps {
-        	        script {
-			    withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'docker_p', usernameVariable: 'docker_u')]) {
-            // some block
-		 	 sh "echo ${docker_p} | docker login --username ${docker_u} --password-stdin"
-                   	 // Tag the 'web' service
-			 echo "Tagging Web Image: ${webImage} -> ${DOCKER_REPO}/web:${DATE_TAG}-${BUILD_NUMBER_TAG}"
-			 sh "docker tag ${webImage} ${DOCKER_REPO}/web:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+        stage('Push') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'docker_p', usernameVariable: 'docker_u')]) {
+                        // Log in to Docker Hub
+                        sh "echo ${docker_p} | docker login --username ${docker_u} --password-stdin"
 
-			 // Tag the 'database' service
-			 echo "Tagging Database Image: ${databaseImage} -> ${DOCKER_REPO}/database:${DATE_TAG}-${BUILD_NUMBER_TAG}"
-			 sh "docker tag ${databaseImage} ${DOCKER_REPO}/database:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+                        // Push the 'web' service
+                        sh "docker push ${DOCKER_REPO}/web:${BUILD_NUMBER_TAG}"
 
-			 // Tag the 'phpmyadmin' service
-			 echo "Tagging Phpmyadmin Image: ${phpmyadminImage} -> ${DOCKER_REPO}/phpmyadmin:${DATE_TAG}-${BUILD_NUMBER_TAG}"
-			 sh "docker tag ${phpmyadminImage} ${DOCKER_REPO}/phpmyadmin:${DATE_TAG}-${BUILD_NUMBER_TAG}"
+                        // Push the 'database' service
+                        sh "docker push ${DOCKER_REPO}/database:${BUILD_NUMBER_TAG}"
 
-		   	 sh "docker logout"
-	            }
+                        // Push the 'phpmyadmin' service
+                        sh "docker push ${DOCKER_REPO}/phpmyadmin:${BUILD_NUMBER_TAG}"
+
+                        // Log out from Docker Hub
+                        sh "docker logout"
+                    }
                 }
             }
         }
@@ -82,7 +81,7 @@ pipeline {
         success {
             // Docker-compose all file down
             sh 'docker-compose down'
-	    // Clean Up Unused Images and Containers
+            // Clean Up Unused Images and Containers
             sh 'docker system prune -a'
         }
     }
