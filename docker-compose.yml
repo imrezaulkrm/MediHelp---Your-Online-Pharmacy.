@@ -2,7 +2,7 @@ version: '3'
 
 services:
   web:
-    image: imrezaulkrm/final-project:web-${BUILD_NUMBER}-${BUILD_DATE}
+    image: ${DOCKER_REPO}web-${BUILD_NUMBER}-${BUILD_DATE}
     ports:
       - "7070:80"
     depends_on:
@@ -17,7 +17,7 @@ services:
       MYSQL_PASSWORD: ""
 
   database:
-    image: imrezaulkrm/final-project:db-${BUILD_NUMBER}-${BUILD_DATE}
+    image: ${DOCKER_REPO}db-${BUILD_NUMBER}-${BUILD_DATE}
     ports:
       - "3306:3306"
     environment:
@@ -28,7 +28,7 @@ services:
       - ./shop_db.sql:/docker-entrypoint-initdb.d/shop_db.sql
 
   phpmyadmin:
-    image: imrezaulkrm/final-project:phpmyadmin-${BUILD_NUMBER}-${BUILD_DATE}
+    image: ${DOCKER_REPO}phpmyadmin-${BUILD_NUMBER}-${BUILD_DATE}
     ports:
       - "9090:80"
     environment:
