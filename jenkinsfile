@@ -31,7 +31,7 @@ pipeline {
 	        script {
 	            withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'docker_p', usernameVariable: 'docker_u')]) {
 	                // Log in to Docker Hub
-	                sh "echo ${docker_p} | docker login --username ${docker_u} --password-stdin"
+	                sh "echo \${docker_p} | docker login --username \${docker_u} --password-stdin"
 
 	                // Push the 'web' service
 	                sh "docker push ${DOCKER_REPO}web-${BUILD_NUMBER_TAG}-${BUILD_DATE}"
