@@ -21,6 +21,7 @@ pipeline {
                     withEnv(["BUILD_DATE=${BUILD_DATE}"]) {
                         // Build Docker images
                         sh 'docker-compose build'
+			sh 'docker-compose up -d'
                     }
                 }
             }
