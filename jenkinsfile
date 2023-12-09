@@ -1,12 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_REPO = 'imrezaulkrm/final-project:'
-        BUILD_NUMBER_TAG = "${BUILD_NUMBER}"
-        DATE_TAG = sh(script: 'date "+%Y%m%d%H%M%S"', returnStdout: true).trim()
-    }
-
     stages {
         stage('Source Code Pull from GitHub') {
             steps {
@@ -23,36 +17,6 @@ pipeline {
             }
         }
 
-        stage('Determine Current Image Names') {
-            steps {
-                script {
-                    // Extract the current image names from the Docker Compose file
-                    webImage = sh(script: "docker-compose config | grep 'image:' | grep 'web' | awk '{print \$3}'", returnStdout: true).trim()
-                    databaseImage = sh(script: "docker-compose config | grep 'image:' | grep 'database' | awk '{print \$2}'", returnStdout: true).trim()
-                    phpmyadminImage = sh(script: "docker-compose config | grep 'image:' | grep 'phpmyadmin' | awk '{print \$2}'", returnStdout: true).trim()
-
-                    echo "Current Web Image Name: ${webImage}"
-                    echo "Current Database Image Name: ${databaseImage}"
-                    echo "Current Phpmyadmin Image Name: ${phpmyadminImage}"
-                }
-            }
-        }
-
-        stage('Tag') {
-            steps {
-                script {
-                    // Tag the 'web' service
-                    sh "docker tag ${webImage} ${DOCKER_REPO}web${BUILD_NUMBER_TAG}"
-
-                    // Tag the 'database' service
-                    sh "docker tag ${databaseImage} ${DOCKER_REPO}database${BUILD_NUMBER_TAG}"
-
-                    // Tag the 'phpmyadmin' service
-                    sh "docker tag ${phpmyadminImage} ${DOCKER_REPO}phpmyadmin${BUILD_NUMBER_TAG}"
-                }
-            }
-        }
-
         stage('Push') {
             steps {
                 script {
@@ -61,13 +25,13 @@ pipeline {
                         sh "echo ${docker_p} | docker login --username ${docker_u} --password-stdin"
 
                         // Push the 'web' service
-                        sh "docker push ${DOCKER_REPO}/web:${BUILD_NUMBER_TAG}"
+                        sh "docker push imrezaulkrm/final-project:web-${BUILD_NUMBER}-${BUILD_DATE}"
 
                         // Push the 'database' service
-                        sh "docker push ${DOCKER_REPO}/database:${BUILD_NUMBER_TAG}"
+                        sh "docker push imrezaulkrm/final-project:db-${BUILD_NUMBER}-${BUILD_DATE}"
 
                         // Push the 'phpmyadmin' service
-                        sh "docker push ${DOCKER_REPO}/phpmyadmin:${BUILD_NUMBER_TAG}"
+                        sh "docker push imrezaulkrm/final-project:phpmyadmin-${BUILD_NUMBER}-${BUILD_DATE}"
 
                         // Log out from Docker Hub
                         sh "docker logout"

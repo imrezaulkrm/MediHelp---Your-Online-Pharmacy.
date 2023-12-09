@@ -2,7 +2,7 @@ version: '3'
 
 services:
   web:
-    build: .
+    image: imrezaulkrm/final-project:web-${BUILD_NUMBER}-${BUILD_DATE}
     ports:
       - "7070:80"
     depends_on:
@@ -14,12 +14,12 @@ services:
       MYSQL_ROOT_PASSWORD: ""
       MYSQL_DATABASE: shop
       MYSQL_USER: root
-      MYSQL_PASSWORD: ""  # Empty password since you mentioned no password in your PHP config
+      MYSQL_PASSWORD: ""
 
   database:
-    image: mysql:5.7
+    image: imrezaulkrm/final-project:db-${BUILD_NUMBER}-${BUILD_DATE}
     ports:
-      - "3306:3306"  # Expose MySQL port
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ""
       MYSQL_DATABASE: shop
@@ -28,7 +28,7 @@ services:
       - ./shop_db.sql:/docker-entrypoint-initdb.d/shop_db.sql
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
+    image: imrezaulkrm/final-project:phpmyadmin-${BUILD_NUMBER}-${BUILD_DATE}
     ports:
       - "9090:80"
     environment:
